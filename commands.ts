@@ -17,3 +17,10 @@ export function uploadFile(
 ) {
   return invokeADB(options, "push", hostPath, fixDevicePath(devicePath));
 }
+
+export function mkdir(
+  devicePath: string,
+  options?: InvokeADBOptions
+) {
+  return invokeADB(options, "shell", `mkdir -p ${fixDevicePath(devicePath)}`);
+}
