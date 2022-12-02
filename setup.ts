@@ -18,7 +18,7 @@ export interface InvokeADBOptions {
 }
 
 export function defaultADBPath() {
-    return path.join(configDir()!, "adb-deno");
+  return path.join(configDir()!, "adb-deno");
 }
 
 export function invokeADB(options?: InvokeADBOptions, ...args: string[]) {
@@ -56,7 +56,7 @@ export async function downloadADB(downloadPath?: string | null) {
     if (entry.type === "file") {
       const buffer = new streams.Buffer();
       await entry.body.stream().pipeTo(buffer.writable);
-      Deno.writeFile(finalPath, buffer.bytes());
+      await Deno.writeFile(finalPath, buffer.bytes());
     } else {
       await Deno.mkdir(finalPath);
     }
