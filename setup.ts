@@ -1,4 +1,4 @@
-import { path, streams, fflate } from "./deps.ts";
+import { path, fflate } from "./deps.ts";
 import { configDir } from "./utils.ts";
 
 const adbDownloadURL =
@@ -51,23 +51,16 @@ export async function downloadADB(downloadPath?: string | null) {
     throw `Unable to download ${archiveRequest} at ${downloadURL}. ${archiveRequest.status} ${archiveRequest.statusText}`;
 
   const array = new Uint8Array(await archiveRequest.arrayBuffer());
-  const decompressed = await new Promise<fflate.Unzipped>((resolve, reject) => {
-    fflate.unzip(array, {}, (err, data) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-
-      resolve(data);
-    });
-  });
+  const decompressed = fflate.unzipSync(array, {});
 
   for (const [name, data] of Object.entries(decompressed)) {
     const finalPath = path.join(downloadPath, name);
 
     const parent = path.dirname(finalPath);
 
-    await Deno.mkdir(parent);
+    await Deno.mkdir(parent, {
+      recursive: true,
+    });
     await Deno.writeFile(finalPath, data);
   }
 
