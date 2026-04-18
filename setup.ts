@@ -1,4 +1,4 @@
-import { path, fflate } from "./deps.ts";
+import { path, zip_js } from "./deps.ts";
 import { configDir } from "./utils.ts";
 
 const adbDownloadURL =
@@ -31,8 +31,8 @@ export function invokeADB(options?: InvokeADBOptions, ...args: string[]) {
     args = ["-s", options?.serial, ...args];
   }
 
-  const process = Deno.run({
-    cmd: [adbPath, ...args],
+  const process = new Deno.Command(adbPath, {
+    args,
     stdout: "piped",
     stderr: "piped",
   });
@@ -42,6 +42,7 @@ export function invokeADB(options?: InvokeADBOptions, ...args: string[]) {
 
 export async function downloadADB(downloadPath?: string | null) {
   downloadPath ??= defaultADBPath();
+  if (!downloadPath) throw "Unable to determine download path for adb. Please provide one.";
 
   // windows/darwin/linux
 
@@ -51,7 +52,7 @@ export async function downloadADB(downloadPath?: string | null) {
     throw `Unable to download ${archiveRequest} at ${downloadURL}. ${archiveRequest.status} ${archiveRequest.statusText}`;
 
   const array = new Uint8Array(await archiveRequest.arrayBuffer());
-  const decompressed = fflate.unzipSync(array, {});
+  const decompressed = new zip_js.Uint8ArrayReader(array);
 
   for (const [name, data] of Object.entries(decompressed)) {
     const finalPath = path.join(downloadPath, name);
